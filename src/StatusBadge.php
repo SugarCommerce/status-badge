@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\StatusBadge;
 
+use SugarCommerce\Plugin\Assets;
 use SugarCommerce\Text\Text;
 
 /**
@@ -143,7 +144,7 @@ final class StatusBadge {
 	/**
 	 * The stylesheet, from the package root.
 	 */
-	private const STYLESHEET = 'assets/css/status-badge.css';
+	private const STYLESHEET = 'css/status-badge.css';
 
 	/**
 	 * Status to type: the defaults with the caller's over them.
@@ -209,7 +210,7 @@ final class StatusBadge {
 		$handle = self::handle();
 
 		if ( ! wp_style_is( $handle, 'registered' ) ) {
-			wp_register_style( $handle, self::url( self::STYLESHEET ), [], self::version( self::STYLESHEET ) );
+			Assets::register_style( $handle, __FILE__, self::STYLESHEET );
 		}
 
 		wp_enqueue_style( $handle );
@@ -364,55 +365,5 @@ final class StatusBadge {
 			'<svg class="wp-status-badge__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="%s"/></svg>',
 			esc_attr( ( self::ICONS[ $type ] ?? self::ICONS[ self::DEFAULT ] )[1] )
 		);
-	}
-
-	/**
-	 * A file's URL in this copy of the package.
-	 *
-	 * Worked out from where the copy sits -- under the content directory,
-	 * under the site root, or in a symlinked plugin -- since a Composer
-	 * library has no plugin file to hand plugins_url().
-	 *
-	 * @param string $file From the package root.
-	 *
-	 * @return string
-	 */
-	private static function url( string $file ): string {
-		$path = wp_normalize_path( dirname( __DIR__ ) . '/' . $file );
-
-		$candidates = [ [ WP_CONTENT_DIR, content_url() ], [ ABSPATH, site_url( '/' ) ] ];
-
-		// A symlinked plugin: __DIR__ is the real path. Core keeps a map
-		// from each plugin's path under the content directory to its real one.
-		foreach ( (array) ( $GLOBALS['wp_plugin_paths'] ?? [] ) as $plugin_path => $real_path ) {
-			$real_path = rtrim( wp_normalize_path( (string) $real_path ), '/' );
-
-			if ( '' !== $real_path && str_starts_with( $path, $real_path . '/' ) ) {
-				$path = wp_normalize_path( (string) $plugin_path ) . substr( $path, strlen( $real_path ) );
-			}
-		}
-
-		foreach ( $candidates as [ $base, $base_url ] ) {
-			$base = rtrim( wp_normalize_path( (string) $base ), '/' );
-
-			if ( '' !== $base && str_starts_with( $path, $base . '/' ) ) {
-				return rtrim( (string) $base_url, '/' ) . substr( $path, strlen( $base ) );
-			}
-		}
-
-		return '';
-	}
-
-	/**
-	 * A file's version: when it last changed, so a new copy is fetched.
-	 *
-	 * @param string $file From the package root.
-	 *
-	 * @return string
-	 */
-	private static function version( string $file ): string {
-		$time = @filemtime( dirname( __DIR__ ) . '/' . $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- a missing file is a version, not a warning.
-
-		return false === $time ? '1.0.0' : (string) $time;
 	}
 }

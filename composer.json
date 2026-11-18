@@ -19,6 +19,7 @@
   ],
   "require": {
     "php": ">=8.3",
+    "sugarcommerce/plugin": "dev-main",
     "sugarcommerce/text": "dev-main"
   },
   "require-dev": {
@@ -28,6 +29,13 @@
     "wp-coding-standards/wpcs": "^3.4"
   },
   "repositories": [
+    {
+      "type": "path",
+      "url": "../plugin",
+      "options": {
+        "symlink": false
+      }
+    },
     {
       "type": "path",
       "url": "../text",

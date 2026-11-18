@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\StatusBadge\Tests;
 
+use SugarCommerce\Plugin\Assets;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SugarCommerce\StatusBadge\StatusBadge;
@@ -30,7 +31,9 @@ final class StatusBadgeTest extends TestCase {
 	protected function setUp(): void {
 		$GLOBALS['sb_enqueued']     = [];
 		$GLOBALS['sb_registered']   = [];
-		$GLOBALS['wp_plugin_paths'] = [];
+		// The package is served from a plugin's vendor folder, as on a site.
+		$GLOBALS['wp_plugin_paths'] = [ WP_CONTENT_DIR . '/plugins/shop/vendor/sugarcommerce/status-badge' => dirname( __DIR__ ) ];
+		Assets::clear_cache();
 	}
 
 	/**
@@ -237,10 +240,6 @@ final class StatusBadgeTest extends TestCase {
 	 * The stylesheet's URL is worked out from where the package sits.
 	 */
 	public function test_the_stylesheet_url_follows_the_package(): void {
-		$package = dirname( __DIR__ );
-
-		$GLOBALS['wp_plugin_paths'] = [ WP_CONTENT_DIR . '/plugins/shop/vendor/sugarcommerce/status-badge' => $package ];
-
 		( new StatusBadge() )->enqueue();
 
 		$this->assertSame(

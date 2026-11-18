@@ -74,11 +74,14 @@ type, and hidden by the stylesheet -- the dot is the mark. Show it with:
 `get_icon( $type )` names it (`heroicons-outline:check-circle`) for drawing
 the same glyph elsewhere. The stylesheet's handle is derived from the
 namespace, so two plugins bundling their own prefixed copies never share one.
+Its URL comes from `sugarcommerce/plugin`'s `Assets`, the one asset-URL helper
+of these packages.
 
 ## Moving from arraypress/wp-*
 
 From `arraypress/wp-status-badge` (`ArrayPress\StatusBadge`). Every method
-keeps its name; it no longer needs `wp-composer-assets` or `wp-field-kit`.
+keeps its name; it no longer needs `wp-field-kit`, and `wp-composer-assets` is
+now `sugarcommerce/plugin`'s `Assets`.
 
 | Old | New |
 |---|---|
