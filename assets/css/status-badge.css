@@ -1,0 +1,102 @@
+/**
+ * Status Badge
+ *
+ * Colours are WordPress's own. Every value here appears in core's admin
+ * stylesheets, which matters for a badge more than for most things: it sits
+ * beside core's notices and core's post states, and a green that is nearly
+ * but not quite core's green reads as a plugin that did not look.
+ *
+ * Every pair was checked against WCAG AA for small text rather than picked by
+ * eye, because a coloured badge is exactly where that goes wrong. Two of the
+ * pairs this replaced did not pass: amber on its old tint came out at 4.32,
+ * and the obvious core green (#00a32a) on the green tint is 3.11 — nowhere
+ * near, and it is the one anybody would reach for first.
+ *
+ *   success  #0a6b2d on #dff5e3   5.80
+ *   warning  #6b4a00 on #fbefc9   7.02
+ *   danger   #a8201f on #fbe3e4   5.95
+ *   info     #0a4b78 on #e1eefb   7.78
+ *   default  #4a4d52 on #ececef   7.20
+ *
+ * The shape is a pill with a dot: no outline and no glyph. An outlined box
+ * with a tick in it is a second, smaller button beside every row, and a
+ * column of them is busier than the column of words it stands for. A soft
+ * tint, a dot in the tone's own colour and the word is the whole badge.
+ */
+
+.wp-status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+
+	/* Vertical padding in a line-height, so a badge in a table cell does not
+	   make the row taller than its neighbours. */
+	padding: 2px 9px 2px 8px;
+	border: 0;
+	border-radius: 999px;
+	background: #ececef;
+	color: #4a4d52;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.5;
+
+	/* A status is one thing. Wrapping it mid-word in a narrow column makes
+	   two, and the second one looks like a different badge. */
+	white-space: nowrap;
+}
+
+/* The dot. Drawn here rather than asked for in the markup, so every badge
+   has one whether or not its caller named an icon. */
+.wp-status-badge::before {
+	content: "";
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: .75;
+}
+
+/* The glyph is not drawn: the dot is the mark. It stays in the markup (an
+   inline SVG), so a stylesheet that wants icons back has them --
+   `.wp-status-badge__icon`. */
+.wp-status-badge__icon {
+	display: none;
+}
+
+.wp-status-badge--success {
+	background: #dff5e3;
+	color: #0a6b2d;
+}
+
+.wp-status-badge--warning {
+	background: #fbefc9;
+	color: #6b4a00;
+}
+
+.wp-status-badge--danger {
+	background: #fbe3e4;
+	color: #a8201f;
+}
+
+.wp-status-badge--info {
+	background: #e1eefb;
+	color: #0a4b78;
+}
+
+/* Same as the base rule, and kept: a caller writing --default explicitly is
+   asking for the grey badge, and it should not depend on the base rule
+   happening to be grey. */
+.wp-status-badge--default {
+	background: #ececef;
+	color: #4a4d52;
+}
+
+/* Colour is not the only carrier — the label is a word — but in
+   forced-colours mode the tints are dropped entirely, so
+   the badge needs an edge to still read as one. */
+@media (forced-colors: active) {
+	.wp-status-badge {
+		border: 1px solid currentColor;
+	}
+}
