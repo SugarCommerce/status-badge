@@ -44,7 +44,9 @@ final class StatusBadge {
 
 	/**
 	 * Status to type, for the statuses WordPress, commerce and membership
-	 * plugins use.
+	 * plugins use -- Easy Digital Downloads' `complete` as well as
+	 * WooCommerce's `completed`, and Stripe's `succeeded`, `past_due` and
+	 * `disputed`.
 	 *
 	 * @var array<string, string>
 	 */
@@ -52,6 +54,7 @@ final class StatusBadge {
 		// Success (green).
 		'active'             => self::SUCCESS,
 		'approved'           => self::SUCCESS,
+		'complete'           => self::SUCCESS,
 		'completed'          => self::SUCCESS,
 		'confirmed'          => self::SUCCESS,
 		'connected'          => self::SUCCESS,
@@ -60,37 +63,54 @@ final class StatusBadge {
 		'live'               => self::SUCCESS,
 		'open'               => self::SUCCESS,
 		'paid'               => self::SUCCESS,
+		'processed'          => self::SUCCESS,
 		'published'          => self::SUCCESS,
 		'resolved'           => self::SUCCESS,
+		'sent'               => self::SUCCESS,
+		'succeeded'          => self::SUCCESS,
 		'valid'              => self::SUCCESS,
 		'verified'           => self::SUCCESS,
+		'won'                => self::SUCCESS,
 		'yes'                => self::SUCCESS,
 
 		// Warning (amber).
 		'awaiting'           => self::WARNING,
 		'draft'              => self::WARNING,
 		'expiring'           => self::WARNING,
+		'failing'            => self::WARNING,
+		'incomplete'         => self::WARNING,
+		'needs_response'     => self::WARNING,
 		'on-hold'            => self::WARNING,
 		'on_hold'            => self::WARNING,
 		'partially_refunded' => self::WARNING,
+		'past_due'           => self::WARNING,
 		'pending'            => self::WARNING,
+		'preapproval'        => self::WARNING,
 		'processing'         => self::WARNING,
+		'requires_action'    => self::WARNING,
 		'review'             => self::WARNING,
 		'scheduled'          => self::WARNING,
 		'trial'              => self::WARNING,
 		'trialing'           => self::WARNING,
+		'trialling'          => self::WARNING,
+		'under_review'       => self::WARNING,
 		'unpaid'             => self::WARNING,
 
 		// Danger (red).
 		'banned'             => self::DANGER,
 		'blocked'            => self::DANGER,
+		'bounced'            => self::DANGER,
 		'cancelled'          => self::DANGER,
 		'canceled'           => self::DANGER,
+		'chargeback'         => self::DANGER,
 		'declined'           => self::DANGER,
+		'disputed'           => self::DANGER,
 		'error'              => self::DANGER,
 		'expired'            => self::DANGER,
 		'failed'             => self::DANGER,
+		'incomplete_expired' => self::DANGER,
 		'invalid'            => self::DANGER,
+		'lost'               => self::DANGER,
 		'overdue'            => self::DANGER,
 		'refunded'           => self::DANGER,
 		'rejected'           => self::DANGER,
@@ -101,13 +121,17 @@ final class StatusBadge {
 
 		// Info (blue).
 		'importing'          => self::INFO,
+		'in_progress'        => self::INFO,
 		'info'               => self::INFO,
 		'new'                => self::INFO,
 		'notice'             => self::INFO,
+		'queued'             => self::INFO,
+		'running'            => self::INFO,
 		'syncing'            => self::INFO,
 		'updated'            => self::INFO,
 
-		// Default (grey).
+		// Default (grey). An abandoned cart is not a failure of the shop's.
+		'abandoned'          => self::DEFAULT,
 		'archived'           => self::DEFAULT,
 		'closed'             => self::DEFAULT,
 		'disabled'           => self::DEFAULT,
@@ -154,6 +178,13 @@ final class StatusBadge {
 	private array $map;
 
 	/**
+	 * Whether a badge draws its glyph in place of the dot.
+	 *
+	 * @var bool
+	 */
+	private bool $icons;
+
+	/**
 	 * Set up a badge renderer.
 	 *
 	 * One per plugin is plenty: it holds the map, and building a new one
@@ -161,9 +192,13 @@ final class StatusBadge {
 	 *
 	 * @param array<string, string> $custom Status to type, merged over the defaults. A
 	 *                                      type that does not exist is dropped.
+	 * @param bool                  $icons  Draw each badge's glyph in place of its dot
+	 *                                      (class `wp-status-badge--icon`). Never both:
+	 *                                      two marks before one word read as two things.
 	 */
-	public function __construct( array $custom = [] ) {
-		$custom = array_change_key_case( $custom, CASE_LOWER );
+	public function __construct( array $custom = [], bool $icons = false ) {
+		$custom      = array_change_key_case( $custom, CASE_LOWER );
+		$this->icons = $icons;
 
 		$this->map = array_merge(
 			self::DEFAULTS,
@@ -191,8 +226,9 @@ final class StatusBadge {
 		$type = null !== $type && in_array( $type, self::get_types(), true ) ? $type : $this->get_type( $status );
 
 		return sprintf(
-			'<span class="wp-status-badge wp-status-badge--%s">%s%s</span>',
+			'<span class="wp-status-badge wp-status-badge--%s%s">%s%s</span>',
 			esc_attr( $type ),
+			$this->icons ? ' wp-status-badge--icon' : '',
 			self::glyph( $type ),
 			esc_html( $label ?? self::format_label( $status ) )
 		);
@@ -237,14 +273,18 @@ final class StatusBadge {
 	/**
 	 * A status's type.
 	 *
-	 * Matched without regard to case or surrounding space.
+	 * Matched without regard to case or surrounding space, and a hyphen
+	 * matches an underscore.
 	 *
 	 * @param string $status The status.
 	 *
 	 * @return string One of get_types(); default for a status nobody mapped.
 	 */
 	public function get_type( string $status ): string {
-		return $this->map[ strtolower( trim( $status ) ) ] ?? self::DEFAULT;
+		$status = strtolower( trim( $status ) );
+
+		// `past-due` is `past_due`: plugins differ only in the joining mark.
+		return $this->map[ $status ] ?? $this->map[ str_replace( '-', '_', $status ) ] ?? self::DEFAULT;
 	}
 
 	/**
@@ -354,7 +394,7 @@ final class StatusBadge {
 	 * A type's glyph, as inline SVG.
 	 *
 	 * In the markup but hidden by the stylesheet: the dot is the mark. A
-	 * stylesheet that wants glyphs shows `.wp-status-badge__icon`.
+	 * renderer made with `icons: true` shows it instead of the dot.
 	 *
 	 * @param string $type The type.
 	 *

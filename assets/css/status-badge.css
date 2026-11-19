@@ -58,10 +58,24 @@
 }
 
 /* The glyph is not drawn: the dot is the mark. It stays in the markup (an
-   inline SVG), so a stylesheet that wants icons back has them --
-   `.wp-status-badge__icon`. */
+   inline SVG) for a badge that asks for it, below. */
 .wp-status-badge__icon {
 	display: none;
+}
+
+/* A badge with its glyph (`new StatusBadge( icons: true )`): the glyph in
+   place of the dot, never both -- two marks before one word read as two
+   things. */
+.wp-status-badge--icon::before {
+	display: none;
+}
+
+.wp-status-badge--icon .wp-status-badge__icon {
+	display: block;
+	flex: none;
+	width: 14px;
+	height: 14px;
+	margin-left: -2px;
 }
 
 .wp-status-badge--success {

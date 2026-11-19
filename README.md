@@ -42,7 +42,7 @@ $badges = new StatusBadge( [
 echo $badges->render( $order->status );
 ```
 
-`completed` comes out green, `failed` red, `pending` amber, a status nobody
+`completed` and `complete` come out green, `failed` red, `pending` amber, a status nobody
 mapped grey -- without the calling code knowing which is which. Keep one
 renderer per plugin: it holds the map.
 
@@ -51,7 +51,7 @@ renderer per plugin: it holds the map.
 ```php
 $badges->render( 'pending', label: __( 'Awaiting payment', 'my-plugin' ) ); // your words
 $badges->render( 'risk_high', 'danger', __( 'High', 'my-plugin' ) );         // a type for one badge
-$badges->get_type( 'Refunded ' );   // 'danger': case and spaces do not matter
+$badges->get_type( 'Refunded ' );   // 'danger': case and spaces do not matter, nor - against _
 $badges->is_danger( $status );      // also is_success(), is_warning(), is_info(), is_type()
 $badges->get_map();                 // every status it knows
 $badges->enqueue();                 // the stylesheet early, for badges drawn by a script
@@ -65,10 +65,11 @@ drawn without a colour.
 The markup is `<span class="wp-status-badge wp-status-badge--{type}">`, a
 glyph and the word. The glyph is a Heroicons outline icon drawn as inline
 SVG (`aria-hidden`, class `wp-status-badge__icon`), different for each
-type, and hidden by the stylesheet -- the dot is the mark. Show it with:
+type, and hidden by the stylesheet -- the dot is the mark. Ask for the
+glyph instead, and it takes the dot's place (never both):
 
-```css
-.wp-status-badge__icon { display: inline-block; width: 14px; height: 14px; }
+```php
+$badges = new StatusBadge( $map, icons: true ); // class wp-status-badge--icon
 ```
 
 `get_icon( $type )` names it (`heroicons-outline:check-circle`) for drawing
@@ -89,6 +90,7 @@ now `sugarcommerce/plugin`'s `Assets`.
 | `render()`, `enqueue()`, `get_type()`, `get_icon()`, `is_*()`, `get_map()`, `get_types()`, `handle()` | unchanged |
 | `format_label( 'on-hold' )` = "On Hold" | "On hold": sentence case, by `sugarcommerce/text` |
 | glyph from wp-field-kit, class `arraypress-icon`, none without the kit | always drawn, class `wp-status-badge__icon` |
+| glyph shown by your own CSS | `new StatusBadge( $map, icons: true )`: the glyph in place of the dot |
 | handle `wp-status-badge` (or `{root}-wp-status-badge` prefixed) | `sugarcommerce-status-badge` (or `{prefixed-namespace}-status-badge`) |
 | a custom key in capitals never matched; a custom type that does not exist drew a colourless badge | keys matched in lower case; unknown types dropped |
 | markup classes `wp-status-badge`, `wp-status-badge--{type}` | unchanged |

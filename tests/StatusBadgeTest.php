@@ -71,6 +71,16 @@ final class StatusBadgeTest extends TestCase {
 			'canceled, one ell'          => [ 'canceled', StatusBadge::DANGER ],
 			'on-hold with a hyphen'      => [ 'on-hold', StatusBadge::WARNING ],
 			'on_hold with an underscore' => [ 'on_hold', StatusBadge::WARNING ],
+
+			// Easy Digital Downloads says `complete`, WooCommerce
+			// `completed`: one was grey beside the other's green.
+			'complete is good'           => [ 'complete', StatusBadge::SUCCESS ],
+			'succeeded is good'          => [ 'succeeded', StatusBadge::SUCCESS ],
+			'past_due is not yet'        => [ 'past_due', StatusBadge::WARNING ],
+			'past-due, hyphenated'       => [ 'past-due', StatusBadge::WARNING ],
+			'disputed is bad'            => [ 'disputed', StatusBadge::DANGER ],
+			'queued is neutral news'     => [ 'queued', StatusBadge::INFO ],
+			'abandoned is just off'      => [ 'abandoned', StatusBadge::DEFAULT ],
 		];
 	}
 
@@ -153,6 +163,20 @@ final class StatusBadgeTest extends TestCase {
 			'#^<span class="wp-status-badge wp-status-badge--success"><svg class="wp-status-badge__icon" [^>]*aria-hidden="true"[^>]*><path [^>]*d="M9 12\.75 [^"]+"/></svg>Active</span>$#',
 			( new StatusBadge() )->render( 'active' )
 		);
+	}
+
+	/**
+	 * A renderer asked for glyphs marks its badges so the glyph replaces the
+	 * dot; one that was not asked leaves the dot alone.
+	 */
+	public function test_a_badge_with_its_glyph_drops_the_dot(): void {
+		$this->assertStringStartsWith( '<span class="wp-status-badge wp-status-badge--success wp-status-badge--icon"><svg ', ( new StatusBadge( [], true ) )->render( 'active' ) );
+		$this->assertStringNotContainsString( '--icon', ( new StatusBadge() )->render( 'active' ) );
+
+		$css = (string) file_get_contents( dirname( __DIR__ ) . '/assets/css/status-badge.css' );
+
+		$this->assertMatchesRegularExpression( '/\.wp-status-badge--icon::before\s*\{\s*display:\s*none;/', $css );
+		$this->assertMatchesRegularExpression( '/\.wp-status-badge--icon \.wp-status-badge__icon\s*\{\s*display:\s*block;/', $css );
 	}
 
 	/**
