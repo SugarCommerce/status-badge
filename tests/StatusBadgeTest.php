@@ -259,14 +259,38 @@ final class StatusBadgeTest extends TestCase {
 	 */
 	public function test_the_stylesheet_handle_is_derived_from_the_namespace(): void {
 		$this->assertSame( 'sugarcommerce-status-badge', StatusBadge::handle() );
+		$this->assertSame( 'myshop-vendor-sugarcommerce-status-badge', $this->prefixed_handle( 'MyShop\\Vendor\\SugarCommerce\\' ) );
+	}
 
+	/**
+	 * A plugin that bundles the packages into its own Lib namespace, with the
+	 * SugarCommerce segment dropped, is named for that whole namespace: two
+	 * plugins of one vendor get two handles, and a one-segment Lib keeps its
+	 * name.
+	 */
+	public function test_plugins_sharing_a_vendor_get_their_own_handle(): void {
+		$fraud = $this->prefixed_handle( 'ArrayPress\\EDD\\FraudFilter\\Lib\\' );
+
+		$this->assertSame( 'arraypress-edd-fraudfilter-lib-status-badge', $fraud );
+		$this->assertNotSame( $fraud, $this->prefixed_handle( 'ArrayPress\\EDD\\SalePrices\\Lib\\' ) );
+		$this->assertSame( 'playground-lib-status-badge', $this->prefixed_handle( 'Playground\\Lib\\' ) );
+	}
+
+	/**
+	 * The handle of a copy of the class compiled the way Strauss prefixes it.
+	 *
+	 * @param string $prefix What replaces "SugarCommerce\" in the namespace.
+	 *
+	 * @return string
+	 */
+	private function prefixed_handle( string $prefix ): string {
 		$copy = sys_get_temp_dir() . '/status-badge-prefixed-' . bin2hex( random_bytes( 4 ) ) . '.php';
 
 		file_put_contents(
 			$copy,
 			str_replace(
-				[ 'namespace SugarCommerce\\', 'use SugarCommerce\\' ],
-				[ 'namespace MyShop\\Vendor\\SugarCommerce\\', 'use SugarCommerce\\' ],
+				'namespace SugarCommerce\\',
+				'namespace ' . $prefix,
 				(string) file_get_contents( dirname( __DIR__ ) . '/src/StatusBadge.php' )
 			)
 		);
@@ -277,6 +301,6 @@ final class StatusBadgeTest extends TestCase {
 			unlink( $copy );
 		}
 
-		$this->assertSame( 'myshop-vendor-sugarcommerce-status-badge', \MyShop\Vendor\SugarCommerce\StatusBadge\StatusBadge::handle() );
+		return ( $prefix . 'StatusBadge\\StatusBadge' )::handle();
 	}
 }
