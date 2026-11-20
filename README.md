@@ -78,22 +78,11 @@ namespace, so two plugins bundling their own prefixed copies never share one.
 Its URL comes from `sugarcommerce/plugin`'s `Assets`, the one asset-URL helper
 of these packages.
 
-## Moving from arraypress/wp-*
+## Security
 
-From `arraypress/wp-status-badge` (`ArrayPress\StatusBadge`). Every method
-keeps its name; it no longer needs `wp-field-kit`, and `wp-composer-assets` is
-now `sugarcommerce/plugin`'s `Assets`.
-
-| Old | New |
-|---|---|
-| `ArrayPress\StatusBadge\StatusBadge` | `SugarCommerce\StatusBadge\StatusBadge` (now `final`) |
-| `render()`, `enqueue()`, `get_type()`, `get_icon()`, `is_*()`, `get_map()`, `get_types()`, `handle()` | unchanged |
-| `format_label( 'on-hold' )` = "On Hold" | "On hold": sentence case, by `sugarcommerce/text` |
-| glyph from wp-field-kit, class `arraypress-icon`, none without the kit | always drawn, class `wp-status-badge__icon` |
-| glyph shown by your own CSS | `new StatusBadge( $map, icons: true )`: the glyph in place of the dot |
-| handle `wp-status-badge` (or `{root}-wp-status-badge` prefixed) | `sugarcommerce-status-badge` (or `{prefixed-namespace}-status-badge`) |
-| a custom key in capitals never matched; a custom type that does not exist drew a colourless badge | keys matched in lower case; unknown types dropped |
-| markup classes `wp-status-badge`, `wp-status-badge--{type}` | unchanged |
+* Script in a badge: the label and every attribute are escaped, and a type
+  is one of the five known, whatever is asked for. Nothing is read from the
+  request.
 
 ## Requirements
 

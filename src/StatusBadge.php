@@ -31,16 +31,16 @@ use SugarCommerce\Text\Text;
  * The markup keeps the `wp-status-badge` classes it has always had, so a
  * plugin's own stylesheet that adjusts badges keeps working.
  */
-final class StatusBadge {
+final readonly class StatusBadge {
 
 	/**
 	 * The badge types.
 	 */
-	public const SUCCESS = 'success';
-	public const WARNING = 'warning';
-	public const DANGER  = 'danger';
-	public const INFO    = 'info';
-	public const DEFAULT = 'default';
+	public const string SUCCESS = 'success';
+	public const string WARNING = 'warning';
+	public const string DANGER = 'danger';
+	public const string INFO = 'info';
+	public const string DEFAULT = 'default';
 
 	/**
 	 * Status to type, for the statuses WordPress, commerce and membership
@@ -50,7 +50,7 @@ final class StatusBadge {
 	 *
 	 * @var array<string, string>
 	 */
-	private const DEFAULTS = [
+	private const array DEFAULTS = [
 		// Success (green).
 		'active'             => self::SUCCESS,
 		'approved'           => self::SUCCESS,
@@ -157,7 +157,7 @@ final class StatusBadge {
 	 *
 	 * @var array<string, array{0: string, 1: string}>
 	 */
-	private const ICONS = [
+	private const array ICONS = [
 		self::SUCCESS => [ 'heroicons-outline:check-circle', 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' ],
 		self::WARNING => [ 'heroicons-outline:clock', 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' ],
 		self::DANGER  => [ 'heroicons-outline:x-circle', 'm9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' ],
@@ -168,7 +168,7 @@ final class StatusBadge {
 	/**
 	 * The stylesheet, from the package root.
 	 */
-	private const STYLESHEET = 'css/status-badge.css';
+	private const string STYLESHEET = 'css/status-badge.css';
 
 	/**
 	 * Status to type: the defaults with the caller's over them.
