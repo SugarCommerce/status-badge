@@ -260,14 +260,13 @@ final readonly class StatusBadge {
 	 * each bundling a prefixed copy would otherwise both register one
 	 * handle; the second registration is a silent no-op, so whichever
 	 * plugin loaded first decides which version of the CSS the other gets.
+	 * sugarcommerce/plugin's Assets::handle() is the rule.
 	 *
 	 * @return string `sugarcommerce-status-badge`, or e.g.
 	 *                `myplugin-vendor-sugarcommerce-status-badge` once prefixed.
 	 */
 	public static function handle(): string {
-		$root = substr( __NAMESPACE__, 0, (int) strrpos( __NAMESPACE__, '\\' ) );
-
-		return trim( strtolower( (string) preg_replace( '/[^A-Za-z0-9]+/', '-', $root ) ), '-' ) . '-status-badge';
+		return Assets::handle( __NAMESPACE__, 'status-badge' );
 	}
 
 	/**

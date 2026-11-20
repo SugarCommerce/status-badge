@@ -75,8 +75,8 @@ $badges = new StatusBadge( $map, icons: true ); // class wp-status-badge--icon
 `get_icon( $type )` names it (`heroicons-outline:check-circle`) for drawing
 the same glyph elsewhere. The stylesheet's handle is derived from the
 namespace, so two plugins bundling their own prefixed copies never share one.
-Its URL comes from `sugarcommerce/plugin`'s `Assets`, the one asset-URL helper
-of these packages.
+Its handle (`Assets::handle()`) and URL come from `sugarcommerce/plugin`'s
+`Assets`, the one asset helper of these packages.
 
 ## Security
 
